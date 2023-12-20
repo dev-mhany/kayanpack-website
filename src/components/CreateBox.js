@@ -165,7 +165,7 @@ function CreateBox() {
     // Encode the message to be URL-friendly
     const encodedMessage = encodeURIComponent(message);
     // Return the full URL for WhatsApp
-    return `https://wa.me/+201068240737?text=${encodedMessage}`;
+    return `https://wa.me/+201029384721?text=${encodedMessage}`;
   }
 
   function handleWhatsAppSend() {

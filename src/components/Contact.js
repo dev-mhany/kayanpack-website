@@ -32,7 +32,7 @@ function Contact() {
         color="primary"
         startIcon={<PhoneIcon />}
         style={{ margin: "10px" }}
-        onClick={() => (window.location = "tel:+201068240737")} // Replace with your phone number
+        onClick={() => (window.location = "tel:+201029384721")} // Replace with your phone number
       >
         Call Us
       </Button>
@@ -42,7 +42,7 @@ function Contact() {
         color="success"
         startIcon={<WhatsAppIcon />}
         style={{ margin: "10px" }}
-        onClick={() => window.open("https://wa.me/+201068240737", "_blank")} // Replace with your WhatsApp link
+        onClick={() => window.open("https://wa.me/+201029384721", "_blank")} // Replace with your WhatsApp link
       >
         WhatsApp
       </Button>
