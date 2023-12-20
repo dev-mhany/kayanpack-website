@@ -3,6 +3,7 @@ import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import IsometricBox from "./IsometricBox";
+import Button from "@mui/material/Button";
 
 function CreateBox() {
   const [boxLength, setBoxLength] = useState();
@@ -24,53 +25,73 @@ function CreateBox() {
 
   // Logic for calculations
   const totalCuts = () => {
-    return quantity / outsNo;
+    // Convert state values to numbers
+    const numQuantity = parseFloat(quantity);
+    const numOutsNo = parseFloat(outsNo);
+    return numQuantity / numOutsNo;
   };
 
   const sheetLength = () => {
-    if (boxHeight === 0) {
-      return boxLength;
+    // Convert state values to numbers
+    const numBoxLength = parseFloat(boxLength);
+    const numBoxWidth = parseFloat(boxWidth);
+    const numBoxHeight = parseFloat(boxHeight);
+
+    if (numBoxHeight === 0) {
+      return numBoxLength;
     } else {
-      return boxLength * 2 + boxWidth * 2 + 4;
+      return numBoxLength * 2 + numBoxWidth * 2 + 4;
     }
   };
-
   const sheetWidth = useCallback(() => {
-    return boxWidth + boxHeight;
-  }, [boxWidth, boxHeight]); // Dependencies
-
+    // Convert state values to numbers inside useCallback
+    const numBoxWidth = parseFloat(boxWidth);
+    const numBoxHeight = parseFloat(boxHeight);
+    return numBoxWidth + numBoxHeight;
+  }, [boxWidth, boxHeight]);
   const sheetArea = () => {
     return (sheetLength() * sheetWidth()) / 10000;
   };
 
   const flap1 = () => {
-    return boxHeight === 0 ? 0 : boxWidth / 2;
+    const numBoxHeight = parseFloat(boxHeight);
+    const numBoxWidth = parseFloat(boxWidth);
+    return numBoxHeight === 0 ? 0 : numBoxWidth / 2;
   };
 
   const flap2 = () => {
-    return flap1(); // Same as flap1
+    return flap1();
   };
 
   const trim = () => {
-    return paperRollWidth - sheetWidth() * outsNo;
+    const numPaperRollWidth = parseFloat(paperRollWidth);
+    return numPaperRollWidth - sheetWidth() * outsNo;
   };
+
   const fullOrderLength = () => {
-    return (totalCuts() * sheetLength()) / 100; // Convert to meters
+    return (totalCuts() * sheetLength()) / 100;
   };
+
   const sheetWeight = () => {
+    const numFacerBPaperWeight = parseFloat(facerBPaperWeight);
+    const numFluteBPaperWeight = parseFloat(fluteBPaperWeight);
+    const numFacerCPaperWeight = parseFloat(facerCPaperWeight);
+    const numFluteCPaperWeight = parseFloat(fluteCPaperWeight);
+    const numDoubleBakerPaperWeight = parseFloat(doubleBakerPaperWeight);
+
     return (
-      ((facerBPaperWeight / 100 +
-        (fluteBPaperWeight / 100) * 1.4 +
-        facerCPaperWeight / 100 +
-        (fluteCPaperWeight / 100) * 1.4 +
-        doubleBakerPaperWeight / 100) *
+      ((numFacerBPaperWeight / 100 +
+        (numFluteBPaperWeight / 100) * 1.4 +
+        numFacerCPaperWeight / 100 +
+        (numFluteCPaperWeight / 100) * 1.4 +
+        numDoubleBakerPaperWeight / 100) *
         sheetLength() *
         sheetWidth()) /
       100
-    ); // The final division by 1000 is to convert to kg
+    );
   };
+
   useEffect(() => {
-    // paperRollWidth should also be initialized for this to work correctly
     if (typeof boxWidth === "number" && typeof boxHeight === "number") {
       const newOutsPossibilities = calculateOutsAndTrim(
         sheetWidth(),
@@ -118,11 +139,65 @@ function CreateBox() {
   };
   // onChange handler
   const handleInputChange = (setter) => (event) => {
-    setter(Number(event.target.value));
+    const value = event.target.value;
+    // Allow decimal values and empty string
+    if (value === "" || /^[0-9]*\.?[0-9]*$/.test(value)) {
+      setter(value);
+    }
   };
+  function createWhatsAppLink() {
+    let message = "Here are the details of the box:\n";
 
+    if (boxLength > 0) message += `Box Length (CM): ${boxLength}\n`;
+    if (boxWidth > 0) message += `Box Width (CM): ${boxWidth}\n`;
+    if (boxHeight > 0) message += `Box Height (CM): ${boxHeight}\n`;
+    if (quantity > 0) message += `Quantity: ${quantity}\n`;
+    if (outsNo > 0) message += `Outs No: ${outsNo}\n`;
+    if (facerBPaperWeight > 0)
+      message += `Facer B Paper Weight: ${facerBPaperWeight}\n`;
+    if (fluteBPaperWeight > 0)
+      message += `Flute B Paper Weight: ${fluteBPaperWeight}\n`;
+    if (fluteCPaperWeight > 0)
+      message += `Flute C Paper Weight: ${fluteCPaperWeight}\n`;
+    if (facerCPaperWeight > 0)
+      message += `Facer C Paper Weight: ${facerCPaperWeight}\n`;
+    if (doubleBakerPaperWeight > 0)
+      message += `Double Baker Paper Weight: ${doubleBakerPaperWeight}\n`;
+    if (paperRollWidth > 0)
+      message += `Paper Roll Width (CM): ${paperRollWidth}\n`;
+
+    // Add the following lines using message +=
+    message +=
+      `Total Cuts: ${Math.ceil(totalCuts())}\n` +
+      `Sheet Length (CM): ${sheetLength()}\n` +
+      `Sheet Width (CM): ${sheetWidth()}\n` +
+      `Sheet Area (M^2): ${sheetArea()}\n` +
+      `Flap 1 (CM): ${flap1()}\n` +
+      `Flap 2 (Same as Flap 1): ${flap2()}\n` +
+      `Trim (CM): ${trim()}\n` +
+      `Full Order Length (M): ${fullOrderLength().toFixed(2)}\n` +
+      `Sheet Weight (G): ${sheetWeight().toFixed(2)}\n`;
+
+    // Assuming 'outsPossibilities' is an array of objects
+    message += outsPossibilities
+      .map(
+        (possibility) =>
+          `${possibility.outs} out(s) - Suggested Paper Roll Width: ${possibility.suggestedPaperRollWidth} CM - Trim: ${possibility.trim} CM`
+      )
+      .join("\n");
+
+    // Encode the message to be URL-friendly
+    const encodedMessage = encodeURIComponent(message);
+    // Return the full URL for WhatsApp
+    return `https://wa.me/+201068240737?text=${encodedMessage}`;
+  }
+
+  function handleWhatsAppSend() {
+    // You can open a new window or redirect the current one
+    window.open(createWhatsAppLink(), "_blank");
+  }
   return (
-    <Box sx={{ flexGrow: 1, padding: 2 }}>
+    <Box sx={{ flexGrow: 1, padding: 2, fontWeight: "bold" }}>
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
           {/* Left side - Inputs */}
@@ -221,7 +296,7 @@ function CreateBox() {
           <p>Total Cuts: {Math.ceil(totalCuts())}</p>
           <p>Sheet Length (CM): {sheetLength()}</p>
           <p>Sheet Width (CM): {sheetWidth()}</p>
-          <p>Sheet Area (M^2): {sheetArea()}</p>
+          <p>Sheet Area (M^2): {sheetArea().toFixed(5)}</p>
           <p>Flap 1 (CM): {flap1()}</p>
           <p>Flap 2 (Same as Flap 1): {flap2()}</p>
           <p>Trim (CM): {trim()}</p>
@@ -240,6 +315,13 @@ function CreateBox() {
               ))}
             </Box>
           )}{" "}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleWhatsAppSend}
+          >
+            Send on WhatsApp
+          </Button>
         </Grid>
       </Grid>
 
