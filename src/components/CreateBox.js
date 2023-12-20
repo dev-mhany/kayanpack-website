@@ -25,73 +25,53 @@ function CreateBox() {
 
   // Logic for calculations
   const totalCuts = () => {
-    // Convert state values to numbers
-    const numQuantity = parseFloat(quantity);
-    const numOutsNo = parseFloat(outsNo);
-    return numQuantity / numOutsNo;
+    return quantity / outsNo;
   };
 
   const sheetLength = () => {
-    // Convert state values to numbers
-    const numBoxLength = parseFloat(boxLength);
-    const numBoxWidth = parseFloat(boxWidth);
-    const numBoxHeight = parseFloat(boxHeight);
-
-    if (numBoxHeight === 0) {
-      return numBoxLength;
+    if (boxHeight === 0) {
+      return boxLength;
     } else {
-      return numBoxLength * 2 + numBoxWidth * 2 + 4;
+      return boxLength * 2 + boxWidth * 2 + 4;
     }
   };
+
   const sheetWidth = useCallback(() => {
-    // Convert state values to numbers inside useCallback
-    const numBoxWidth = parseFloat(boxWidth);
-    const numBoxHeight = parseFloat(boxHeight);
-    return numBoxWidth + numBoxHeight;
-  }, [boxWidth, boxHeight]);
+    return boxWidth + boxHeight;
+  }, [boxWidth, boxHeight]); // Dependencies
+
   const sheetArea = () => {
     return (sheetLength() * sheetWidth()) / 10000;
   };
 
   const flap1 = () => {
-    const numBoxHeight = parseFloat(boxHeight);
-    const numBoxWidth = parseFloat(boxWidth);
-    return numBoxHeight === 0 ? 0 : numBoxWidth / 2;
+    return boxHeight === 0 ? 0 : boxWidth / 2;
   };
 
   const flap2 = () => {
-    return flap1();
+    return flap1(); // Same as flap1
   };
 
   const trim = () => {
-    const numPaperRollWidth = parseFloat(paperRollWidth);
-    return numPaperRollWidth - sheetWidth() * outsNo;
+    return paperRollWidth - sheetWidth() * outsNo;
   };
-
   const fullOrderLength = () => {
-    return (totalCuts() * sheetLength()) / 100;
+    return (totalCuts() * sheetLength()) / 100; // Convert to meters
   };
-
   const sheetWeight = () => {
-    const numFacerBPaperWeight = parseFloat(facerBPaperWeight);
-    const numFluteBPaperWeight = parseFloat(fluteBPaperWeight);
-    const numFacerCPaperWeight = parseFloat(facerCPaperWeight);
-    const numFluteCPaperWeight = parseFloat(fluteCPaperWeight);
-    const numDoubleBakerPaperWeight = parseFloat(doubleBakerPaperWeight);
-
     return (
-      ((numFacerBPaperWeight / 100 +
-        (numFluteBPaperWeight / 100) * 1.4 +
-        numFacerCPaperWeight / 100 +
-        (numFluteCPaperWeight / 100) * 1.4 +
-        numDoubleBakerPaperWeight / 100) *
+      ((facerBPaperWeight / 100 +
+        (fluteBPaperWeight / 100) * 1.4 +
+        facerCPaperWeight / 100 +
+        (fluteCPaperWeight / 100) * 1.4 +
+        doubleBakerPaperWeight / 100) *
         sheetLength() *
         sheetWidth()) /
       100
-    );
+    ); // The final division by 1000 is to convert to kg
   };
-
   useEffect(() => {
+    // paperRollWidth should also be initialized for this to work correctly
     if (typeof boxWidth === "number" && typeof boxHeight === "number") {
       const newOutsPossibilities = calculateOutsAndTrim(
         sheetWidth(),
@@ -139,11 +119,7 @@ function CreateBox() {
   };
   // onChange handler
   const handleInputChange = (setter) => (event) => {
-    const value = event.target.value;
-    // Allow decimal values and empty string
-    if (value === "" || /^[0-9]*\.?[0-9]*$/.test(value)) {
-      setter(value);
-    }
+    setter(Number(event.target.value));
   };
   function createWhatsAppLink() {
     let message = "Here are the details of the box:\n";
@@ -296,7 +272,7 @@ function CreateBox() {
           <p>Total Cuts: {Math.ceil(totalCuts())}</p>
           <p>Sheet Length (CM): {sheetLength()}</p>
           <p>Sheet Width (CM): {sheetWidth()}</p>
-          <p>Sheet Area (M^2): {sheetArea().toFixed(5)}</p>
+          <p>Sheet Area (M^2): {sheetArea()}</p>
           <p>Flap 1 (CM): {flap1()}</p>
           <p>Flap 2 (Same as Flap 1): {flap2()}</p>
           <p>Trim (CM): {trim()}</p>
